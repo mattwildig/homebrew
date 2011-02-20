@@ -18,6 +18,11 @@ class Postgresql <Formula
   end
 
   skip_clean :all
+  
+  def patches
+    #tidy up where install puts files
+    DATA
+  end
 
   def install
     ENV.libxml2 if MACOS_VERSION >= 10.6
@@ -49,6 +54,7 @@ class Postgresql <Formula
 
     system "./configure", *args
     system "make install"
+    system "make install-docs"
 
     contrib_directories = Dir.glob("contrib/*").select{ |path| File.directory?(path) } - ['contrib/start-scripts']
 
@@ -157,3 +163,55 @@ To install gems without sudo, see the Homebrew wiki.
     EOPLIST
   end
 end
+__END__
+
+diff --git a/src/Makefile.global.in b/src/Makefile.global.in
+index 280578a..e89754a 100644
+--- a/src/Makefile.global.in
++++ b/src/Makefile.global.in
+@@ -74,45 +74,25 @@ datarootdir := @datarootdir@
+ bindir := @bindir@
+ 
+ datadir := @datadir@
+-ifeq "$(findstring pgsql, $(datadir))" ""
+-ifeq "$(findstring postgres, $(datadir))" ""
+ override datadir := $(datadir)/postgresql
+-endif
+-endif
+ 
+ sysconfdir := @sysconfdir@
+-ifeq "$(findstring pgsql, $(sysconfdir))" ""
+-ifeq "$(findstring postgres, $(sysconfdir))" ""
+ override sysconfdir := $(sysconfdir)/postgresql
+-endif
+-endif
+ 
+ libdir := @libdir@
+ 
+ pkglibdir = $(libdir)
+-ifeq "$(findstring pgsql, $(pkglibdir))" ""
+-ifeq "$(findstring postgres, $(pkglibdir))" ""
+ override pkglibdir := $(pkglibdir)/postgresql
+-endif
+-endif
+ 
+ includedir := @includedir@
+ 
+ pkgincludedir = $(includedir)
+-ifeq "$(findstring pgsql, $(pkgincludedir))" ""
+-ifeq "$(findstring postgres, $(pkgincludedir))" ""
+ override pkgincludedir := $(pkgincludedir)/postgresql
+-endif
+-endif
+ 
+ mandir := @mandir@
+ 
+ docdir := @docdir@
+-ifeq "$(findstring pgsql, $(docdir))" ""
+-ifeq "$(findstring postgres, $(docdir))" ""
+ override docdir := $(docdir)/postgresql
+-endif
+-endif
+ 
+ htmldir := @htmldir@
+ 
